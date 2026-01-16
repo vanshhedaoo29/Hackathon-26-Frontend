@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Health Advisory | AQI Monitor</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Reset and Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: #f8fafc;
+            color: #1e293b;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        /* Navigation Bar - No Background Color */
+        .navbar {
+            padding: 15px 0;
+            border-bottom: 3px solid #22c55e;
+        }
+        
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #1e3a8a;
+            font-size: 1.3rem;
+            font-weight: 600;
+            text-decoration: none;
+        }
+        
+        .nav-brand i {
+            color: #22c55e;
+            font-size: 1.5rem;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 30px;
+            list-style: none;
+        }
+        
+        .nav-links a {
+            color: #1e3a8a;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 8px 16px;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-links a:hover,
+        .nav-links a.active {
+            background: #f1f5f9;
+            color: #1e3a8a;
+        }
+        
+        /* Header Title - No Background Color */
+        .page-header {
+            padding: 40px 0;
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .page-header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: #1e3a8a;
+        }
+        
+        .page-header p {
+            font-size: 1.2rem;
+            color: #475569;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        /* Main Content - Small Sections Layout */
+        .main-content {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 30px;
+            padding-bottom: 40px;
+        }
+        
+        /* AQI Status Section */
+        .aqi-section {
+            grid-column: span 12;
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            border-left: 5px solid #facc15;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+        
+        .aqi-display {
+            display: flex;
+            align-items: center;
+            gap: 40px;
+            margin-bottom: 20px;
+        }
+        
+        .aqi-number {
+            font-size: 4.5rem;
+            font-weight: 800;
+            color: #1e293b;
+        }
+        
+        .aqi-details {
+            flex: 1;
+        }
+        
+        .aqi-category {
+            display: inline-block;
+            background: #facc15;
+            color: #854d0e;
+            padding: 8px 24px;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+        }
+        
+        .aqi-description {
+            font-size: 1.1rem;
+            color: #475569;
+            line-height: 1.7;
+        }
+        
+        /* Section Styling - Small Cards */
+        .section {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            border-top: 3px solid #22c55e;
+        }
+        
+        .section-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #1e3a8a;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        
+        /* Recommendations Section with Symbols */
+        .recommendations-section {
+            grid-column: span 8;
+        }
+        
+        .recommendation-list {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .recommendation-item {
+            padding: 20px;
+            background: #f8fafc;
+            border-radius: 10px;
+            border-left: 4px solid #22c55e;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+        }
+        
+        .recommendation-item:hover {
+            background: #f1f5f9;
+            transform: translateX(5px);
+        }
+        
+        .recommendation-item.priority {
+            border-left-color: #ef4444;
+            background: #fef2f2;
+        }
+        
+        .recommendation-item.priority:hover {
+            background: #fee2e2;
+        }
+        
+        .item-icon {
+            width: 40px;
+            height: 40px;
+            background: #22c55e;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+        
+        .priority .item-icon {
+            background: #ef4444;
+        }
+        
+        .item-content {
+            flex: 1;
+        }
+        
+        .recommendation-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 8px;
+        }
+        
+        .priority-badge {
+            display: inline-block;
+            background: #fee2e2;
+            color: #dc2626;
+            font-size: 0.8rem;
+            font-weight: 600;
+            padding: 4px 12px;
+            border-radius: 4px;
+            margin-bottom: 8px;
+        }
+        
+        .recommendation-desc {
+            color: #475569;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+        
+        /* Sensitive Groups Section with Symbols */
+        .sensitive-section {
+            grid-column: span 4;
+        }
+        
+        .group-list {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .group-item {
+            padding: 20px;
+            background: #f0f9ff;
+            border-radius: 10px;
+            border-left: 4px solid #3b82f6;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+        }
+        
+        .group-item:hover {
+            background: #e0f2fe;
+            transform: translateX(5px);
+        }
+        
+        .group-icon {
+            width: 40px;
+            height: 40px;
+            background: #3b82f6;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+        
+        .group-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 8px;
+        }
+        
+        .group-desc {
+            color: #475569;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+        
+        /* AQI Categories Section - With Background Colors as in Image */
+        .categories-section {
+            grid-column: span 12;
+        }
+        
+        .categories-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-top: 10px;
+        }
+        
+        .category-item {
+            border-radius: 10px;
+            padding: 25px 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            color: white;
+            min-height: 150px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .category-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        }
+        
+        .category-range {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            opacity: 0.95;
+        }
+        
+        .category-name {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        
+        .category-desc {
+            font-size: 0.95rem;
+            line-height: 1.5;
+            opacity: 0.9;
+            max-width: 90%;
+        }
+        
+        /* Background Colors as shown in the image */
+        .good { 
+            background: linear-gradient(135deg, #74f2a2, #53d884);
+        }
+        
+        .satisfactory { 
+            background: linear-gradient(135deg, #aadf5b, #80be28);
+        }
+        
+        .moderate { 
+            background: linear-gradient(135deg, #f8de74, #f1c84e);
+            color: #f8f9fa !important;
+        }
+        
+        .moderate .category-range,
+        .moderate .category-desc {
+            color: #fcfeff !important;
+        }
+        
+        .poor { 
+            background: linear-gradient(135deg, #f99a4c, #fc8835);
+            color: #ffffff !important;
+        }
+        
+        .poor .category-range,
+        .poor .category-desc {
+            color: #ffffff !important;
+        }
+        
+        .very-poor { 
+            background: linear-gradient(135deg, #fa6d6d, #ea4141);
+        }
+        
+        .severe { 
+            background: linear-gradient(135deg, #ae4444, #a83030);
+        }
+        
+        /* Footer - No Background Color */
+        .footer {
+            padding: 40px 0 20px;
+            margin-top: 40px;
+            border-top: 2px solid #e2e8f0;
+        }
+        
+        .footer-content {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            gap: 40px;
+            margin-bottom: 30px;
+        }
+        
+        .footer-section {
+            flex: 1;
+            min-width: 250px;
+        }
+        
+        .footer-title {
+            font-size: 1.3rem;
+            color: #1e3a8a;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+        
+        .footer-links {
+            list-style: none;
+        }
+        
+        .footer-links li {
+            margin-bottom: 12px;
+        }
+        
+        .footer-links a {
+            color: #475569;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        
+        .footer-links a:hover {
+            color: #1e3a8a;
+        }
+        
+        .footer-info {
+            font-size: 0.9rem;
+            line-height: 1.8;
+            color: #475569;
+        }
+        
+        .footer-info i {
+            color: #22c55e;
+            margin-right: 8px;
+        }
+        
+        .footer-bottom {
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid #e2e8f0;
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 992px) {
+            .recommendations-section {
+                grid-column: span 12;
+            }
+            
+            .sensitive-section {
+                grid-column: span 12;
+            }
+            
+            .categories-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .aqi-display {
+                flex-direction: column;
+                text-align: center;
+                gap: 20px;
+            }
+            
+            .nav-links {
+                gap: 15px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 12px 0;
+            }
+            
+            .nav-container {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .nav-links {
+                gap: 10px;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            .nav-links a {
+                padding: 6px 12px;
+                font-size: 0.9rem;
+            }
+            
+            .page-header h1 {
+                font-size: 2rem;
+            }
+            
+            .page-header p {
+                font-size: 1.1rem;
+            }
+            
+            .aqi-number {
+                font-size: 3.5rem;
+            }
+            
+            .categories-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .footer-content {
+                flex-direction: column;
+            }
+            
+            .section {
+                padding: 20px;
+            }
+            
+            .recommendation-item,
+            .group-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+            
+            .item-icon,
+            .group-icon {
+                width: 35px;
+                height: 35px;
+                font-size: 1rem;
+            }
+        }
+        
+        /* Simple Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .fade-in {
+            animation: fadeInUp 0.6s ease forwards;
+        }
+        
+        .delay-1 { animation-delay: 0.1s; }
+        .delay-2 { animation-delay: 0.2s; }
+        .delay-3 { animation-delay: 0.3s; }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-container">
+                <a href="#" class="nav-brand">
+                    <i class="fas fa-wind"></i>
+                    AQI Monitor
+                </a>
+                
+                <ul class="nav-links">
+                    <li><a href="#" class="active">Dashboard</a></li>
+                    <li><a href="#">Forecast</a></li>
+                    <li><a href="#">History</a></li>
+                    <li><a href="#">Health Advisory</a></li>
+                    <li><a href="#">About</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Page Header -->
+    <header class="page-header">
+        <div class="container">
+            <h1>Health Advisory Based on AQI</h1>
+            <p>Personalized health recommendations for current air quality</p>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container">
+        <div class="main-content">
+            <!-- AQI Status Section -->
+            <section class="aqi-section fade-in">
+                <div class="aqi-display">
+                    <div class="aqi-number">187</div>
+                    <div class="aqi-details">
+                        <div class="aqi-category">Moderate</div>
+                        <p class="aqi-description">
+                            Air quality is unhealthy for sensitive groups. Reduce prolonged outdoor activities.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Recommended Actions Section with Symbols -->
+            <section class="section recommendations-section fade-in delay-1">
+                <h2 class="section-title">Recommended Actions</h2>
+                
+                <div class="recommendation-list">
+                    <div class="recommendation-item priority">
+                        <div class="item-icon">
+                            <i class="fas fa-head-side-mask"></i>
+                        </div>
+                        <div class="item-content">
+                            <h3 class="recommendation-title">Wear N95 masks outdoors</h3>
+                            <span class="priority-badge">Priority</span>
+                            <p class="recommendation-desc">Use certified N95 or N99 masks when stepping outside</p>
+                        </div>
+                    </div>
+                    
+                    <div class="recommendation-item priority">
+                        <div class="item-icon">
+                            <i class="fas fa-running"></i>
+                        </div>
+                        <div class="item-content">
+                            <h3 class="recommendation-title">Limit physical activity</h3>
+                            <span class="priority-badge">Priority</span>
+                            <p class="recommendation-desc">Avoid strenuous outdoor exercises and heavy workouts</p>
+                        </div>
+                    </div>
+                    
+                    <div class="recommendation-item">
+                        <div class="item-icon">
+                            <i class="fas fa-door-closed"></i>
+                        </div>
+                        <div class="item-content">
+                            <h3 class="recommendation-title">Keep windows closed</h3>
+                            <p class="recommendation-desc">Use air purifiers indoors and seal gaps in doors/windows</p>
+                        </div>
+                    </div>
+                    
+                    <div class="recommendation-item">
+                        <div class="item-icon">
+                            <i class="fas fa-wind"></i>
+                        </div>
+                        <div class="item-content">
+                            <h3 class="recommendation-title">Use air purifiers</h3>
+                            <p class="recommendation-desc">Run HEPA air purifiers in living and sleeping areas</p>
+                        </div>
+                    </div>
+                    
+                    <div class="recommendation-item">
+                        <div class="item-icon">
+                            <i class="fas fa-tint"></i>
+                        </div>
+                        <div class="item-content">
+                            <h3 class="recommendation-title">Stay hydrated</h3>
+                            <p class="recommendation-desc">Drink plenty of water to help your body cope with pollutants</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Sensitive Groups Section with Symbols -->
+            <section class="section sensitive-section fade-in delay-2">
+                <h2 class="section-title">Sensitive Groups Alert</h2>
+                
+                <div class="group-list">
+                    <div class="group-item">
+                        <div class="group-icon">
+                            <i class="fas fa-child"></i>
+                        </div>
+                        <div class="group-content">
+                            <h3 class="group-title">Children</h3>
+                            <p class="group-desc">Keep children indoors during peak pollution hours<br>High sensitivity to air pollutants</p>
+                        </div>
+                    </div>
+                    
+                    <div class="group-item">
+                        <div class="group-icon">
+                            <i class="fas fa-user-friends"></i>
+                        </div>
+                        <div class="group-content">
+                            <h3 class="group-title">Elderly</h3>
+                            <p class="group-desc">Senior citizens should avoid outdoor activities<br>Increased respiratory vulnerability</p>
+                        </div>
+                    </div>
+                    
+                    <div class="group-item">
+                        <div class="group-icon">
+                            <i class="fas fa-lungs"></i>
+                        </div>
+                        <div class="group-content">
+                            <h3 class="group-title">Asthma Patients</h3>
+                            <p class="group-desc">Keep inhalers handy, follow medication schedule<br>Risk of asthma attacks</p>
+                        </div>
+                    </div>
+                    
+                    <div class="group-item">
+                        <div class="group-icon">
+                            <i class="fas fa-heart"></i>
+                        </div>
+                        <div class="group-content">
+                            <h3 class="group-title">Heart Patients</h3>
+                            <p class="group-desc">Monitor symptoms, avoid exertion<br>Cardiovascular stress risk</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- AQI Categories Section - With Background Colors -->
+            <section class="section categories-section fade-in delay-3">
+                <h2 class="section-title">Understanding AQI Categories</h2>
+                
+                <div class="categories-grid">
+                    <!-- Row 1: First 3 Categories -->
+                    <div class="category-item good">
+                        <div class="category-name">Good (0-50)</div>
+                        <p class="category-desc">Minimal impact on health</p>
+                    </div>
+                    
+                    <div class="category-item satisfactory">
+                        <div class="category-name">Satisfactory (51-100)</div>
+                        <p class="category-desc">Minor discomfort for sensitive people</p>
+                    </div>
+                    
+                    <div class="category-item moderate">
+                        <div class="category-name">Moderate (101-200)</div>
+                        <p class="category-desc">Breathing discomfort for sensitive groups</p>
+                    </div>
+                    
+                    <!-- Row 2: Last 3 Categories -->
+                    <div class="category-item poor">
+                        <div class="category-name">Poor (201-300)</div>
+                        <p class="category-desc">Breathing discomfort for most people</p>
+                    </div>
+                    
+                    <div class="category-item very-poor">
+                        
+                        <div class="category-name">Very Poor (301-400)</div>
+                        <p class="category-desc">Respiratory illness on prolonged exposure</p>
+                    </div>
+                    
+                    <div class="category-item severe">
+                        <div class="category-name">Severe (401-500)</div>
+                        <p class="category-desc">Serious health effects for everyone</p>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3 class="footer-title">AQI Monitor</h3>
+                    <p class="footer-info">
+                        Real-time air quality monitoring and AI-powered predictions for healthier living.
+                    </p>
+                </div>
+                
+                <div class="footer-section">
+                    <h3 class="footer-title">Quick Links</h3>
+                    <ul class="footer-links">
+                        <li><a href="#">Dashboard</a></li>
+                        <li><a href="#">Forecast</a></li>
+                        <li><a href="#">Health Advisory</a></li>
+                        <li><a href="#">About</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h3 class="footer-title">Information</h3>
+                    <p class="footer-info">
+                        <i class="fas fa-database"></i> Data Source: CPCB / OpenAI<br>
+                        <i class="fas fa-exclamation-circle"></i> AQI values are indicative<br>
+                        <i class="fas fa-code"></i> Developed for Hackathon
+                    </p>
+                </div>
+            </div>
+            
+            
+        </div>
+    </footer>
+
+    <script>
+        // Simple hover effects
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add hover effects to interactive elements
+            const interactiveItems = document.querySelectorAll('.recommendation-item, .group-item, .category-item');
+            
+            interactiveItems.forEach(item => {
+                item.addEventListener('mouseenter', function() {
+                    this.style.cursor = 'pointer';
+                });
+            });
+            
+            // AQI value simulation
+            const aqiNumber = document.querySelector('.aqi-number');
+            const aqiCategory = document.querySelector('.aqi-category');
+            
+            const aqiLevels = [
+                { value: 187, category: "Moderate", color: "#facc15" },
+                { value: 245, category: "Poor", color: "#fb923c" },
+                { value: 125, category: "Moderate", color: "#facc15" },
+                { value: 85, category: "Satisfactory", color: "#84cc16" }
+            ];
+            
+            let currentIndex = 0;
+            
+            setInterval(() => {
+                const level = aqiLevels[currentIndex];
+                
+                // Update AQI number with animation
+                aqiNumber.style.opacity = '0.7';
+                setTimeout(() => {
+                    aqiNumber.textContent = level.value;
+                    aqiNumber.style.opacity = '1';
+                    
+                    // Update category
+                    aqiCategory.textContent = level.category;
+                    aqiCategory.style.background = level.color;
+                    
+                    // Update section border color
+                    document.querySelector('.aqi-section').style.borderLeftColor = level.color;
+                }, 300);
+                
+                currentIndex = (currentIndex + 1) % aqiLevels.length;
+            }, 5000);
+            
+            // Priority items subtle animation
+            const priorityItems = document.querySelectorAll('.priority');
+            
+            setInterval(() => {
+                priorityItems.forEach(item => {
+                    item.style.boxShadow = 'inset 4px 0 0 #ef4444';
+                    setTimeout(() => {
+                        item.style.boxShadow = 'none';
+                    }, 1000);
+                });
+            }, 3000);
+        });
+    </script>
+</body>
+</html>
